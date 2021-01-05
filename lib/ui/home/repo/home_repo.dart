@@ -5,7 +5,7 @@ import 'package:fl_wiki/ui/home/entity/query.dart';
 class HomeRepo {
   final _homeDs = HomeApiDS();
 
-  Stream<Query> getPagesData(int page, String query) {
-    return _homeDs.getPagesData(page, query);
+  Stream<Query> getPagesData(String query) {
+    return _homeDs.getPagesData(query);
   }
 }

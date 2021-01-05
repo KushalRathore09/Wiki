@@ -7,14 +7,12 @@ import 'package:fl_wiki/ui/home/state/home_state.dart';
 import 'package:fl_wiki/widgets/custom_loader.dart';
 import 'package:fl_wiki/widgets/custom_webview.dart';
 import 'package:fl_wiki/widgets/error_view.dart';
-import 'package:fl_wiki/widgets/pagination_wrapper.dart';
 import 'package:fl_wiki/widgets/skeleton.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../colors.dart';
 import 'entity/pages.dart';
-import 'entity/query.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -33,12 +31,19 @@ class HomePageState extends BaseStatefulWidgetState<HomePage> {
   );
   final TextEditingController _searchQuery = new TextEditingController();
 
+  bool isApiCall = false;
+
   HomePageState() {
     _searchQuery.addListener(() {
-      if (_searchQuery.text.isEmpty) {
-        _homeBloc.getData(query: '');
-      } else {
+      if (_searchQuery.text.isNotEmpty) {
         _homeBloc.getData(query: _searchQuery.text);
+        setState(() {
+          isApiCall = true;
+        });
+      } else {
+        setState(() {
+          isApiCall = false;
+        });
       }
     });
   }
@@ -52,13 +57,13 @@ class HomePageState extends BaseStatefulWidgetState<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: buildBar(context),
-        body: StreamBuilder<ListDataState>(
+        body: isApiCall ? StreamBuilder<ListDataState>(
             stream: _homeBloc.listDataState,
+            initialData: _homeBloc.listDataState.value,
             builder: (context, snapshot) {
               final state = snapshot.data;
-              final isLoadingMore = state?.isLoadingMore ?? false;
 
-              if ((state?.isLoading() ?? true) && !isLoadingMore) {
+              if (state?.isLoading() ?? true) {
                 return CustomLoader();
               }
 
@@ -74,37 +79,10 @@ class HomePageState extends BaseStatefulWidgetState<HomePage> {
                 );
               }
 
-              return StreamBuilder<Query>(
-                  stream: _homeBloc.querryListData,
-                  initialData: _homeBloc.querryListData.value,
-                  builder: (context, snapshot) {
-                    final items = snapshot.data?.pages ?? List();
+              final items = state.data?.pages ?? List();
 
-                    if (state.isCompleted() &&
-                        items.isEmpty &&
-                        !state.isLoadingMore)
-                      return Center(
-                        child: ErrorView(
-                          content: state.error?.toString(),
-                          retryVisible: false,
-                        ),
-                      );
-
-                    return PaginationWrapper(
-                      onLoadMore: () {
-                        _homeBloc.loadMore(_searchQuery.text);
-                      },
-                      isLoading: state.isLoading(),
-                      isEndReached: false,
-                      scrollableChild: SingleChildScrollView(
-                          child: Column(
-                        children: <Widget>[
-                          _wikiList(items),
-                        ],
-                      )),
-                    );
-                  });
-            }));
+              return _wikiList(items);
+            }) : Container() );
   }
 
   Widget buildBar(BuildContext context) {
@@ -113,7 +91,6 @@ class HomePageState extends BaseStatefulWidgetState<HomePage> {
         icon: actionIcon,
         onPressed: () {
           setState(() {
-            /*_homeBloc.getData();*/
             if (this.actionIcon.icon == Icons.search) {
               this.actionIcon = new Icon(
                 Icons.close,
@@ -157,14 +134,11 @@ class HomePageState extends BaseStatefulWidgetState<HomePage> {
       child: ListView.builder(
         primary: false,
         shrinkWrap: true,
-        itemBuilder: (context, position) {
-          if (position == pagesList.length) {
-            return CustomLoader();
-          }
-          Pages page = pagesList[position];
+        itemBuilder: (context, index) {
+          Pages page = pagesList[index];
           return _listTile(page);
         },
-        itemCount: pagesList.length + 1,
+        itemCount: pagesList.length,
       ),
     );
   }
@@ -180,7 +154,7 @@ class HomePageState extends BaseStatefulWidgetState<HomePage> {
             new MaterialPageRoute(
                 builder: (context) => CustomWebView(
                       selectedUrl:
-                          RestConstants.OPEN_WEBPAGE+_searchQuery.text,
+                          RestConstants.OPEN_WEBPAGE + _searchQuery.text,
                     )));
       },
       child: Container(
