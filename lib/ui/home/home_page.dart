@@ -179,6 +179,8 @@ class HomePageState extends BaseStatefulWidgetState<HomePage> {
                   height: 200.0,
                   fit: BoxFit.fitWidth,
                   imageUrl: page?.thumbnail?.source ?? "",
+                  // here image is getting broken ..
+                  /*imageUrl: "${RestConstants.IMAGE_URL}$isImageBroken",*/
                   placeholder: (context, url) => Skeleton(
                     width: MediaQuery.of(context).size.width,
                     height: 200.0,
@@ -215,7 +217,7 @@ class HomePageState extends BaseStatefulWidgetState<HomePage> {
                             ],
                             fontWeight: FontWeight.bold),
                       ),
-                      Text(
+                      page?.terms == null ? Text("") : Text(
                         page?.terms?.description[0] ?? "",
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -230,7 +232,7 @@ class HomePageState extends BaseStatefulWidgetState<HomePage> {
                               ),
                             ],
                             fontWeight: FontWeight.bold),
-                      ),
+                      ) ,
                     ],
                   ),
                 ),
