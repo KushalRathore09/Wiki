@@ -17,9 +17,9 @@ class Query {
       });
     }
 
-    if (json['pages'] != null) {
+    if (json['query']['pages'] != null) {
       pages = new List<Pages>();
-      json['pages'].forEach((v) {
+      json['query']['pages'].forEach((v) {
         pages.add(new Pages.fromJson(v));
       });
     }

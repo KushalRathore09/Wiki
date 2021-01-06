@@ -27,8 +27,9 @@ class _CustomWebViewState extends State<CustomWebView> {
     return WebviewScaffold(
         url: widget.selectedUrl,
         appBar: new AppBar(
-          backgroundColor: Color.fromRGBO(66, 103, 178, 1),
+          backgroundColor: Colors.black,
           title: new Text("Wiki"),
+          centerTitle: true,
         ));
   }
 }

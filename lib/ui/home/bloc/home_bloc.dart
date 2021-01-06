@@ -9,7 +9,7 @@ class HomeBloc extends BaseBloc {
    final listDataState = BehaviorSubject<ListDataState>();
 
 
-  void getData({String query='wiki'}) {
+  void getData({String query=''}) {
     subscription.add(_homeRepo
         .getPagesData(query)
         .map((data) => ListDataState.completed(data))
